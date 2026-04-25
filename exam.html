@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Study Plan</title>
+<style>
+:root{--bg:#0f1115;--card:#171a21;--text:#f5f7fa;--muted:#9aa4b2;--line:#262b36;--accent:#4f8cff;--done:#1f9d55}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.container{max-width:820px;margin:0 auto;padding:24px;padding-top:54px}.progress-fixed{position:fixed;top:0;left:0;width:100%;height:4px;background:rgba(255,255,255,.06);z-index:99998}.progress-fill{height:100%;width:0%;background:var(--accent);transition:width .35s ease}
+h1{font-size:28px;margin:0 0 6px}p{margin:0;color:var(--muted)}
+.top{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+.badge{background:var(--card);border:1px solid var(--line);padding:10px 14px;border-radius:999px;color:var(--muted);font-size:14px}
+.grid{display:grid;gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;position:relative;overflow:hidden}.card.complete{border-color:var(--done);box-shadow:0 0 0 1px var(--done) inset;opacity:.92}.card.complete::after{content:'';position:absolute;top:0;left:0;width:220%;height:2px;background:rgba(255,60,60,.95);transform:rotate(11deg);transform-origin:top left;pointer-events:none;z-index:3;box-shadow:0 0 8px rgba(255,60,60,.35);animation:slash .45s ease}@keyframes slash{0%{opacity:0;transform:rotate(11deg) scaleX(.2)}100%{opacity:1;transform:rotate(11deg) scaleX(1)}}
+.card h2{font-size:18px;margin:0 0 8px}.date{color:var(--muted);font-size:14px;margin-bottom:10px}
+ul{margin:0;padding-left:18px}.task{margin:8px 0}
+.today{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.small{font-size:13px;color:var(--muted)}
+.footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
+input[type=checkbox]{transform:scale(1.15);margin-right:8px;accent-color:var(--done)}
+label.done{text-decoration:line-through;color:var(--muted);transform:scale(.98)} label{display:inline-flex;align-items:center;gap:6px;transition:transform .22s ease,color .22s ease,filter .22s ease} label:hover{transform:translateX(2px)} .pop{animation:pop .45s cubic-bezier(.2,.9,.2,1)} .spark{animation:spark .7s ease} @keyframes pop{0%{transform:scale(1)}35%{transform:scale(1.14)}100%{transform:scale(1)}} @keyframes spark{0%{filter:drop-shadow(0 0 0 rgba(79,140,255,0))}40%{filter:drop-shadow(0 0 10px rgba(79,140,255,.9))}100%{filter:drop-shadow(0 0 0 rgba(79,140,255,0))}} .practical{font-size:12px;color:var(--muted);opacity:.9} .practical span{padding:2px 8px;border:1px solid var(--line);border-radius:999px} #toast.show{opacity:1;transform:translate(-50%,0) scale(1)}
+</style>
+</head>
+<body>
+<div class="progress-fixed"><div class="progress-fill" id="progressFill"></div></div>
+<div class="container">
+<div class="top">
+<div>
+<h1>Manav's Study Plan</h1>
+<p>Exam schedule</p>
+</div>
+<div style="display:flex;gap:10px;flex-wrap:wrap"><div class="badge" id="todayText"></div><div class="badge" id="xpBar">Lv 1 • 0%</div></div>
+</div>
+<div class="grid" id="schedule"></div>
+<div class="badge" id="toast" style="display:block;opacity:0;transform:translate(-50%,8px) scale(.96);transition:.35s ease;position:fixed;bottom:22px;left:50%;z-index:99999;color:var(--text);background:var(--accent);border-color:var(--accent);box-shadow:0 12px 30px rgba(0,0,0,.35);pointer-events:none;font-weight:700;"></div>
+<div class="footer">Stay consistent. One quest at a time.</div>
+</div>
+<script>
+const plan=[
+{d:'2026-04-26',title:'Sunday',tasks:['Maths','C++']},
+{d:'2026-04-27',title:'Monday',tasks:['Maths','C++','AI Practical Exam']},
+{d:'2026-04-28',title:'Tuesday',tasks:['Maths','C++','AI','IBM Practical Exam']},
+{d:'2026-04-29',title:'Wednesday',tasks:['Maths','AI','C++ Practical Exam']},
+{d:'2026-04-30',title:'Thursday',tasks:['Maths','AI','EDG Practical Exam']},
+{d:'2026-05-01',title:'Friday',tasks:['Psychology','IKS','IWP Practical Exam']},
+{d:'2026-05-02',title:'Saturday',tasks:['Psychology','IKS']},
+{d:'2026-05-03',title:'Sunday',tasks:['EDG','IWP']},
+{d:'2026-05-04',title:'Monday',tasks:['EDG','IWP']},
+{d:'2026-05-05',title:'Tuesday',tasks:['IWP till evening','C++ evening onwards']},
+{d:'2026-05-06',title:'Wednesday',tasks:['C++ Exam','AI after exam']},
+{d:'2026-05-07',title:'Thursday',tasks:['AI Exam','Maths after exam']},
+{d:'2026-05-08',title:'Friday',tasks:['Maths Exam']},
+{d:'2026-05-09',title:'Saturday',tasks:['IWP + EDG']},
+{d:'2026-05-10',title:'Sunday',tasks:['IWP + EDG till evening','Psychology evening onwards']},
+{d:'2026-05-11',title:'Monday',tasks:['Psychology Exam','IWP after exam']},
+{d:'2026-05-12',title:'Tuesday',tasks:['IWP Exam','EDG after exam']},
+{d:'2026-05-13',title:'Wednesday',tasks:['EDG Exam','IKS after exam']},
+{d:'2026-05-14',title:'Thursday',tasks:['IKS Exam']}
+];
+const wrap=document.getElementById('schedule');
+const STORAGE_KEY='manav-study-plan-checks';
+const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
+const today=new Date().toISOString().slice(0,10);
+const toast=document.getElementById('toast');
+const msgs=['XP gained ✨','Quest complete 😎','Combo streak 🔥','Leveling up 😊','Progress saved 🚀','Victory move 😄','You are advancing 🏆'];
+function updateXP(){const total=document.querySelectorAll('input[type=checkbox]').length;const done=document.querySelectorAll('input[type=checkbox]:checked').length;const xp=Math.round((done/total)*100)||0;const lvl=Math.floor(done/5)+1;document.getElementById('xpBar').textContent=`Lv ${lvl} • ${xp}%`;document.getElementById('progressFill').style.width=xp+'%';document.querySelectorAll('.card').forEach(card=>{const boxes=card.querySelectorAll('input[type=checkbox]');const checked=card.querySelectorAll('input[type=checkbox]:checked');card.classList.toggle('complete',boxes.length>0&&boxes.length===checked.length);});}
+function showToast(){toast.textContent=msgs[Math.floor(Math.random()*msgs.length)];toast.style.display='block';toast.style.opacity='1';toast.style.transform='translate(-50%,0) scale(1)';clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>{toast.style.opacity='0';toast.style.transform='translate(-50%,8px) scale(.96)';},1800);updateXP();}
+document.getElementById('todayText').textContent='Today: '+today;
+plan.forEach((day,i)=>{
+const card=document.createElement('div');card.className='card'+(day.d===today?' today':'');
+card.innerHTML=`<h2>${day.title}</h2><div class='date'>${day.d}</div>`;
+const ul=document.createElement('ul');
+day.tasks.forEach((t,j)=>{
+const li=document.createElement('li');li.className='task';
+const id='c'+i+'-'+j;
+const practical=t.toLowerCase().includes('practical'); li.innerHTML=`<label class='${practical?`practical`:``}' for='${id}'><input id='${id}' type='checkbox' ${saved[id]?'checked':''}> <span>${t}</span></label>`;
+ul.appendChild(li);
+if(saved[id]) li.querySelector('label').classList.add('done');
+});
+card.appendChild(ul);wrap.appendChild(card);
+});
+wrap.addEventListener('change',e=>{if(e.target.type==='checkbox'){const label=e.target.parentElement;label.classList.toggle('done',e.target.checked);saved[e.target.id]=e.target.checked;localStorage.setItem(STORAGE_KEY,JSON.stringify(saved));updateXP();if(e.target.checked){label.classList.remove('pop','spark');void label.offsetWidth;label.classList.add('pop','spark');if(navigator.vibrate) navigator.vibrate(35);showToast();}}})
+updateXP();
+</script>
+</body>
+</html>
