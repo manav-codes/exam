@@ -48,4 +48,4 @@ Built for myself to:
 
 
 ```txt
-https://yourusername.github.io/exam-schedule/
+https://manav-codes.github.io/exam/
